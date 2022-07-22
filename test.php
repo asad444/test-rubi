@@ -6,16 +6,6 @@ function xssFilter4Board($target)
 {
 	$target = str_replace("<iframe", "&lt;iframe", $target);
 	preg_match_all("\&;iframe[^>]*src=[']?([^>']+)[']?[^>]*>/", $target, $ifrm);
-	$allows = array();
-	for($i=0;$i<sizeof($ifrm[1]);$i++){
-		for($j=0;$j<sizeof($allows);$j++){
-			if(strpos($ifrm[1][$i], $allows[$j]) !== false){
-				$ifrm_str=$ifrm[0][$i];
-				$ifrm_str_re = str_replace("&lt;iframe", "<iframe", $ifrm_str);
-				$target = str_replace($ifrm_str, $ifrm_stre_re, $target);
-			}
-		}
-	}
 
 	$target = str_replace("<script", "&lt;script", $target);
 	$target = str_replace("</script>", "&lt;script&gt;", $target);
@@ -150,7 +140,7 @@ if($_GET['page'] == "upload"){
 if($_GET['page'] == "download"){
     //$path = htmlentities($_GET['file'], ENT_QUOTES, 'UTF-8');
     $path = xssFilter4Board($_GET['file']);
-    $content = file_get_contents("./upload/{$path}"); // ---------path traversal, ssrf
+    $content = xssFilter4Board(file_get_contents("./upload/{$path}")); // ---------path traversal, ssrf
     
     if(!$content){
         exit("<script>alert(`not exists file`);history.go(-1);</script>");
