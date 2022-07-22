@@ -95,19 +95,20 @@ if($_GET['page'] == "upload"){
         exit("<script>alert(`login plz`);history.go(-1);</script>");
     }
     
-    $filename=$_FILES['fileToUpload']['name'];
-    #$filetype=$_FILES['fileToUpload']['type'];
-    $filename = htmlspecialchars($filename, ENT_QUOTES, 'UTF-8');
-    #$filetype = strtolower($filetype);
+    //$filename=$_FILES['fileToUpload']['name'];
+    //$filetype=$_FILES['fileToUpload']['type'];
+    //$filename = htmlspecialchars($filename, ENT_QUOTES, 'UTF-8');
+    //$filetype = strtolower($filetype);
     
-    $filename_tmp_name = $_FILES['fileToUpload']['tmp_name'];
+    $filename = htmlentities($_FILES['fileToUpload']['name'], ENT_QUOTES, 'UTF-8');
+    $filename_tmp_name = htmlentities($_FILES['fileToUpload']['tmp_name'], ENT_QUOTES, 'UTF-8');
     
     if($_FILES['fileToUpload']['size'] >= 1024 * 1024 * 1){ 
         exit("<script>alert(`file is too big`);history.go(-1);</script>"); 
     } // file size limit(1MB). do not remove it.
     $extension = explode(".",$filename)[1];
     if($extension == "txt" || $extension == "png"){
-        system("cp {$filename_tmp_name} ./upload/{$_FILES['fileToUpload']['name']}");
+        system("cp {$filename_tmp_name} ./upload/{$filename}");
         // ------------------------ command injection
         exit("<script>alert(`upload ok`);location.href=`/`;</script>");
     }
@@ -116,7 +117,7 @@ if($_GET['page'] == "upload"){
     }
 }
 if($_GET['page'] == "download"){
-    $path = htmlspecialchars(addslashes($_GET['file']), ENT_QUOTES, 'UTF-8');
+    $path = htmlentities($_GET['file'], ENT_QUOTES, 'UTF-8');
     $content = file_get_contents("./upload/{$path}"); // ---------path traversal, ssrf
     if(!$content){
         exit("<script>alert(`not exists file`);history.go(-1);</script>");
