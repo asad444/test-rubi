@@ -5,8 +5,28 @@ include "./config.php";
 function xssFilter4Board($target)
 {
 	$target = str_replace("<iframe", "&lt;iframe", $target);
-	preg_match_all("\&;iframe[^>]*src=[']?([^>']+)[']?[^>]*>/", $target, $ifrm);
-
+	preg_match_all("\&;iframe[^>]*src=[']?([^>']+)[']?[^>]*>/", $target, $target);
+    $arrchn = array("onabort","onactivate","onafterprint","onafterupdate",	
+    "onbeforeactivate",	"onbeforecopy","onbeforecut","onbeforedeactivate","onbeforeeditfocus",
+    "onbeforepaste","onbeforeprint","onbeforeunload","onbeforeupdate","onbegin","onblur","onbounce",
+    "oncellchange",	"onchange",	"onclick","oncontentready","oncontentsave","oncontextmenu",
+    "oncontrolselect","oncopy",	"oncut","ondataavailable","ondatasetchanged","ondatasetcomplete",
+    "ondblclick","ondeactivate","ondetach","ondocumentready","ondrag","ondragdrop",	"ondragend",	
+    "ondragenter","ondragleave","ondragover","ondragstart",	"ondrop","onend",
+    "onerror",	"onerrorupdate","onfilterchange","onfinish","onfocus","onfocusin",	
+    "onfocusout","onhelp","onhide","onkeydown","onkeypress","onkeyup","onlayoutcomplete",
+    "onload","onlosecapture","onmediacomplete","onmediaerror","onmedialoadfailed",	
+    "onmousedown","onmouseenter","onmouseleave","onmousemove","onmouseout","onmouseover",	
+    "onmouseup","onmousewheel","onmove","onmoveend","onmovestart","onopenstatechange",
+    "onoutofsync","onpaste","onpause","onplaystatechange","onpropertychange",				
+    "onreadystatechange","onrepeat","onreset","onresize","onresizeend","onresizestart","onresume",
+    "onreverse","onrowclick","onrowenter","onrowexit","onrowout","onrowover","onrowsdelete",				"onrowsinserted",	
+    "onsave","onscroll","onseek","onselect","onselectionchange","onselectstart",		
+    "onshow","onstart","onstop","onsubmit","onsyncrestored","ontimeerror",
+    "ontrackchange","onunload","onurlflip", "javascript");
+    for($j=0;$j<sizeof($arrchn);$j++){
+        $target = str_replace($arrchn[j], "", $target);
+    }
 	$target = str_replace("<script", "&lt;script", $target);
 	$target = str_replace("</script>", "&lt;script&gt;", $target);
 	$target = str_replace("<input", "&lt;input", $target);
