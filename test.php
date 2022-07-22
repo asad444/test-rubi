@@ -161,7 +161,7 @@ if($_GET['page'] == "download"){
     //$path = htmlentities($_GET['file'], ENT_QUOTES, 'UTF-8');
     $path = htmlentities(xssFilter4Board($_GET['file']), ENT_QUOTES, 'UTF-8');
     $content = xssFilter4Board(file_get_contents("./upload/{$path}")); // ---------path traversal, ssrf
-    
+    $content = str_replace("..", "aa", $content);
     if(!$content){
         exit("<script>alert(`not exists file`);history.go(-1);</script>");
     }
