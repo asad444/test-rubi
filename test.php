@@ -108,6 +108,7 @@ if($_GET['page'] == "upload"){
     $extension = explode(".",$filename)[1];
     if($extension == "txt" || $extension == "png"){
         system("cp {$_FILES['fileToUpload']['tmp_name']} ./upload/{$_FILES['fileToUpload']['name']}");
+        // ------------------------ command injection
         exit("<script>alert(`upload ok`);location.href=`/`;</script>");
     }
     else{
@@ -116,13 +117,13 @@ if($_GET['page'] == "upload"){
 }
 if($_GET['page'] == "download"){
     $path = htmlspecialchars(addslashes($_GET['file']), ENT_QUOTES, 'UTF-8');
-    $content = file_get_contents("./upload/{$path}");
+    $content = file_get_contents("./upload/{$path}"); // ---------path traversal, ssrf
     if(!$content){
         exit("<script>alert(`not exists file`);history.go(-1);</script>");
     }
     else{
         header("Content-Disposition: attachment;");
-        echo $content;
+        echo $content; // -------------- xss
         exit;
     }
 }
@@ -131,9 +132,16 @@ if($_GET['page'] == "admin"){
         exit("<script>alert(`login plz`);history.go(-1);</script>");
     }
     $db = dbconnect();
-    $result = mysqli_fetch_array(mysqli_query($db,"select id from member where id='{$_SESSION['id']}'"));
+    //$result = mysqli_fetch_array(mysqli_query($db,"select id from member where id='{$_SESSION['id']}'"));
+    $query = "select id from member where id= ?";
+    $stmt = $db->prepare($query);
+    $stmt->bind_param("s", $_SESSION['id']);
+    
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $result = $result->fetch_assoc();
     if($result['id'] == "admin"){
-        echo file_get_contents("/flag"); // do not remove it.
+        echo file_get_contents("/flag"); // do not remove it. --------- xss
     }
     else{
         exit("<script>alert(`admin only`);history.go(-1);</script>");
