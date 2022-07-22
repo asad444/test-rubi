@@ -12,11 +12,24 @@ if($_GET['page'] == "login"){
     $id = htmlspecialchars(addslashes($input['id']), ENT_QUOTES, 'UTF-8'); // my
     $pw = htmlspecialchars(addslashes($input['pw']), ENT_QUOTES, 'UTF-8'); // my
     
+    //$id = $input['id'];
+    //$pw = $input['pw'];
+    
     if(isset($id) && isset($pw) && !empty($id) && !empty($pw))
     {
         $db = dbconnect();
-        $query = "select id,pw from member where id='{$id}'";
-        $result = mysqli_fetch_array(mysqli_query($db,$query));
+        //$query = "select id,pw from member where id='{$id}'";
+        //$result = mysqli_fetch_array(mysqli_query($db,$query));
+        
+        //$stmt = $db->stmt_init();
+        $query = "select id,pw from member where id= ?";
+        $stmt = $db->prepare($query);
+        $stmt->bind_param("s", $id);
+        
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $result = $result->fetch_assoc();
+        
         if($result['id'] && $result['pw'] == $pw){
             $_SESSION['id'] = $result['id'];
             $_SESSION['pw'] = $result['pw'];
@@ -44,11 +57,26 @@ if($_GET['page'] == "join"){
         if(strlen($id) > 256) exit("<script>alert(`userid too long`);history.go(-1);</script>");
         if(strlen($email) > 120) exit("<script>alert(`email too long`);history.go(-1);</script>");
         if(!filter_var($email,FILTER_VALIDATE_EMAIL)) exit("<script>alert(`wrong email`);history.go(-1);</script>");
-        $query = "select id from member where id='{$id}'";
-        $result = mysqli_fetch_array(mysqli_query($db,$query));
+        //$query = "select id from member where id='{$id}'";
+        //$result = mysqli_fetch_array(mysqli_query($db,$query));
+        
+        $query = "select id,pw from member where id= ?";
+        $stmt = $db->prepare($query);
+        $stmt->bind_param("s", $id);
+        
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $result = $result->fetch_assoc();
+        
         if(!$result['id']){
-            $query = "insert into member values('{$id}','{$email}','{$pw}','user')";
-            mysqli_query($db,$query);
+            //$query = "insert into member values('{$id}','{$email}','{$pw}','user')";
+            //mysqli_query($db,$query);
+            
+            $query = "insert into member values(?, ?, ?,'user')";
+            $stmt = $db->prepare($query);
+            $stmt->bind_param("sss", $id, $email, $pw);
+            
+            $stmt->execute();
             exit("<script>alert(`join ok`);location.href=`/`;</script>");
         }
         else{
@@ -100,9 +128,6 @@ if($_GET['page'] == "download"){
 }
 if($_GET['page'] == "admin"){
     if(!$_SESSION['id']){
-        exit("<script>alert(`login plz`);history.go(-1);</script>");
-    }
-    if($_SESSION['id'] == $result['id']){
         exit("<script>alert(`login plz`);history.go(-1);</script>");
     }
     $db = dbconnect();
