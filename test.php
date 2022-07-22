@@ -1,6 +1,35 @@
 <?php
 session_start();
 include "./config.php";
+
+function xssFilter4Board($target)
+{
+	$target = str_replace("<iframe", "&lt;iframe", $target);
+	preg_match_all("\&;iframe[^>]*src=[']?([^>']+)[']?[^>]*>/", $target, $ifrm);
+	$allows = array();
+	for($i=0;$i<sizeof($ifrm[1]);$i++){
+		for($j=0;$j<sizeof($allows);$j++){
+			if(strpos($ifrm[1][$i], $allows[$j]) !== false){
+				$ifrm_str=$ifrm[0][$i];
+				$ifrm_str_re = str_replace("&lt;iframe", "<iframe", $ifrm_str);
+				$target = str_replace($ifrm_str, $ifrm_stre_re, $target);
+			}
+		}
+	}
+
+	$target = str_replace("<script", "&lt;script", $target);
+	$target = str_replace("</script>", "&lt;script&gt;", $target);
+	$target = str_replace("<input", "&lt;input", $target);
+	$target = str_replace("</input>", "&lt;input&gt;", $target);
+	$target = str_replace("<form", "&lt;from", $target);
+	$target = str_replace("</form>", "&lt;/form&gt", $target);
+	$target = str_replace("<textarea", "&lt;textarea", $target);
+	$target = str_replace("</textarea", "&lt;textarea&gt", $target);
+	$target = str_replace("<meta", "&lt;meta", $target);
+	$target = str_replace("</meta>", "&lt;meta&gt;", $target);
+	return $target;
+}
+
 if($_GET['page'] == "login"){
     try{
         $input = json_decode(file_get_contents('php://input'), true);
@@ -100,8 +129,10 @@ if($_GET['page'] == "upload"){
     //$filename = htmlspecialchars($filename, ENT_QUOTES, 'UTF-8');
     //$filetype = strtolower($filetype);
     
-    $filename = htmlentities($_FILES['fileToUpload']['name'], ENT_QUOTES, 'UTF-8');
-    $filename_tmp_name = htmlentities($_FILES['fileToUpload']['tmp_name'], ENT_QUOTES, 'UTF-8');
+    //$filename = htmlentities($_FILES['fileToUpload']['name'], ENT_QUOTES, 'UTF-8');
+    //$filename_tmp_name = htmlentities($_FILES['fileToUpload']['tmp_name'], ENT_QUOTES, 'UTF-8');
+    $filename = xssFilter4Board($_FILES['fileToUpload']['name']);
+    $filename_tmp_name = xssFilter4Board($_FILES['fileToUpload']['tmp_name']);
     
     if($_FILES['fileToUpload']['size'] >= 1024 * 1024 * 1){ 
         exit("<script>alert(`file is too big`);history.go(-1);</script>"); 
@@ -117,8 +148,10 @@ if($_GET['page'] == "upload"){
     }
 }
 if($_GET['page'] == "download"){
-    $path = htmlentities($_GET['file'], ENT_QUOTES, 'UTF-8');
+    //$path = htmlentities($_GET['file'], ENT_QUOTES, 'UTF-8');
+    $path = xssFilter4Board($_GET['file']);
     $content = file_get_contents("./upload/{$path}"); // ---------path traversal, ssrf
+    
     if(!$content){
         exit("<script>alert(`not exists file`);history.go(-1);</script>");
     }
