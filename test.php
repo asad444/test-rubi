@@ -100,14 +100,14 @@ if($_GET['page'] == "upload"){
     $filename = htmlspecialchars($filename, ENT_QUOTES, 'UTF-8');
     #$filetype = strtolower($filetype);
     
-    
+    $filename_tmp_name = $_FILES['fileToUpload']['tmp_name'];
     
     if($_FILES['fileToUpload']['size'] >= 1024 * 1024 * 1){ 
         exit("<script>alert(`file is too big`);history.go(-1);</script>"); 
     } // file size limit(1MB). do not remove it.
     $extension = explode(".",$filename)[1];
     if($extension == "txt" || $extension == "png"){
-        system("cp {$_FILES['fileToUpload']['tmp_name']} ./upload/{$_FILES['fileToUpload']['name']}");
+        system("cp {$filename_tmp_name} ./upload/{$_FILES['fileToUpload']['name']}");
         // ------------------------ command injection
         exit("<script>alert(`upload ok`);location.href=`/`;</script>");
     }
